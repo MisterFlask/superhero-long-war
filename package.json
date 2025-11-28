@@ -1,0 +1,13 @@
+{
+  "name": "superhero-long-war",
+  "version": "1.0.0",
+  "description": "Roguelike deckbuilder combining XCOM strategy with Slay the Spire combat",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
