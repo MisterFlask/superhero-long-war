@@ -3,37 +3,1898 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superhero Long War</title>
+    <title>Superhero Long War - Game Design Spec</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-section: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-orange: #d29922;
+            --accent-pink: #db61a2;
+            --border-color: #30363d;
+
+            /* Resource Colors */
+            --blood: #dc2626;
+            --glint: #fbbf24;
+            --ashes: #6b7280;
+            --pages: #3b82f6;
+            --iron: #a1a1aa;
+
+            /* Faction Colors */
+            --cult: #7c3aed;
+            --undead: #065f46;
+            --swarm: #b45309;
+
+            /* Class Colors */
+            --brute: #dc2626;
+            --blaster: #f97316;
+            --tinker: #3b82f6;
+            --thinker: #a855f7;
+            --mover: #22c55e;
+            --stranger: #6366f1;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            padding: 0;
         }
-        .container {
-            text-align: center;
-            padding: 2rem;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
         }
-        h1 {
-            font-size: 3rem;
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        nav h2 {
+            color: var(--accent-blue);
+            font-size: 1.1rem;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
-        p {
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            margin: 0.3rem 0;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+            background: var(--bg-section);
+        }
+
+        nav .nav-section {
+            margin-top: 1rem;
+        }
+
+        nav .nav-section-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Main Content */
+        main {
+            margin-left: 280px;
+            padding: 2rem 3rem;
+            max-width: 1200px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            color: var(--text-secondary);
             font-size: 1.2rem;
-            opacity: 0.9;
+        }
+
+        header .tagline {
+            margin-top: 1rem;
+            color: var(--accent-green);
+            font-style: italic;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 2rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--accent-purple);
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.highlight {
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .info-box.warning {
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .info-box.success {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-section);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* Game Card */
+        .game-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .game-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .game-card .card-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .game-card .card-cost {
+            background: var(--accent-blue);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .game-card .card-type {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card .card-effect {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .game-card .card-flavor {
+            font-style: italic;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        /* Resource indicators in cards */
+        .resource {
+            font-weight: 700;
+            padding: 0 0.2rem;
+        }
+
+        .resource.blood { color: var(--blood); }
+        .resource.glint { color: var(--glint); }
+        .resource.ashes { color: var(--ashes); }
+        .resource.pages { color: var(--pages); }
+        .resource.iron { color: var(--iron); }
+
+        /* Class-specific card borders */
+        .game-card.brute { border-color: var(--brute); }
+        .game-card.blaster { border-color: var(--blaster); }
+        .game-card.tinker { border-color: var(--tinker); }
+        .game-card.thinker { border-color: var(--thinker); }
+        .game-card.mover { border-color: var(--mover); }
+        .game-card.stranger { border-color: var(--stranger); }
+
+        .game-card.brute .card-cost { background: var(--brute); }
+        .game-card.blaster .card-cost { background: var(--blaster); }
+        .game-card.tinker .card-cost { background: var(--tinker); }
+        .game-card.thinker .card-cost { background: var(--thinker); }
+        .game-card.mover .card-cost { background: var(--mover); }
+        .game-card.stranger .card-cost { background: var(--stranger); }
+
+        /* Faction Cards */
+        .faction-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .faction-card.cult { border-color: var(--cult); }
+        .faction-card.undead { border-color: var(--undead); }
+        .faction-card.swarm { border-color: var(--swarm); }
+
+        .faction-card h4 {
+            margin-top: 0;
+        }
+
+        .faction-card.cult h4 { color: var(--cult); }
+        .faction-card.undead h4 { color: var(--undead); }
+        .faction-card.swarm h4 { color: var(--swarm); }
+
+        /* Resource Display */
+        .resource-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .resource-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .resource-item h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-item.blood h4 { color: var(--blood); }
+        .resource-item.glint h4 { color: var(--glint); }
+        .resource-item.ashes h4 { color: var(--ashes); }
+        .resource-item.pages h4 { color: var(--pages); }
+        .resource-item.iron h4 { color: var(--iron); }
+
+        /* Class Section */
+        .class-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .class-section.brute { border-left: 4px solid var(--brute); }
+        .class-section.blaster { border-left: 4px solid var(--blaster); }
+        .class-section.tinker { border-left: 4px solid var(--tinker); }
+        .class-section.thinker { border-left: 4px solid var(--thinker); }
+        .class-section.mover { border-left: 4px solid var(--mover); }
+        .class-section.stranger { border-left: 4px solid var(--stranger); }
+
+        .class-section h3 {
+            margin-top: 0;
+        }
+
+        .class-section.brute h3 { color: var(--brute); }
+        .class-section.blaster h3 { color: var(--blaster); }
+        .class-section.tinker h3 { color: var(--tinker); }
+        .class-section.thinker h3 { color: var(--thinker); }
+        .class-section.mover h3 { color: var(--mover); }
+        .class-section.stranger h3 { color: var(--stranger); }
+
+        .class-stats {
+            display: flex;
+            gap: 2rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .class-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .class-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .class-stat-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Diagram */
+        .diagram {
+            background: var(--bg-section);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--text-secondary);
+        }
+
+        /* Design Pillar */
+        .pillar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .pillar h4 {
+            color: var(--accent-purple);
+            margin-top: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            nav {
+                position: static;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .game-card, .faction-card, .class-section {
+                break-inside: avoid;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hello World!</h1>
-        <p>Welcome to Superhero Long War</p>
-    </div>
+    <nav>
+        <h2>Superhero Long War</h2>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+
+            <div class="nav-section">
+                <div class="nav-section-title">World</div>
+                <li><a href="#setting">Setting</a></li>
+                <li><a href="#factions">Enemy Factions</a></li>
+                <li><a href="#campaign">Campaign Structure</a></li>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Strategic Layer</div>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#map">Strategic Map</a></li>
+                <li><a href="#heat">Faction Heat System</a></li>
+                <li><a href="#missions">Mission Types</a></li>
+                <li><a href="#doom">Doom Counter</a></li>
+                <li><a href="#bazaar">Bazaar System</a></li>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Heroes</div>
+                <li><a href="#heroes">Hero System</a></li>
+                <li><a href="#classes">Hero Classes</a></li>
+                <li><a href="#roster">Roster Management</a></li>
+                <li><a href="#stress">Stress & Trauma</a></li>
+                <li><a href="#resistances">Resistances</a></li>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Combat</div>
+                <li><a href="#combat">Combat System</a></li>
+                <li><a href="#combat-resources">Combat Resources</a></li>
+                <li><a href="#card-design">Card Design</a></li>
+                <li><a href="#death">Hero Death</a></li>
+                <li><a href="#retreat">Retreat & Victory</a></li>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Cards</div>
+                <li><a href="#brute-cards">Brute Cards</a></li>
+                <li><a href="#blaster-cards">Blaster Cards</a></li>
+                <li><a href="#tinker-cards">Tinker Cards</a></li>
+                <li><a href="#thinker-cards">Thinker Cards</a></li>
+                <li><a href="#mover-cards">Mover Cards</a></li>
+                <li><a href="#stranger-cards">Stranger Cards</a></li>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Design</div>
+                <li><a href="#pillars">Design Pillars</a></li>
+                <li><a href="#open-questions">Open Questions</a></li>
+            </div>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Superhero Long War</h1>
+            <p class="subtitle">Roguelike Deckbuilder Design Specification</p>
+            <p class="tagline">XCOM meets Slay the Spire in a world under siege</p>
+        </header>
+
+        <!-- OVERVIEW -->
+        <section id="overview">
+            <h2>Overview</h2>
+
+            <div class="info-box highlight">
+                <p><strong>Concept:</strong> A roguelike deckbuilder combining XCOM-style strategic layer with Slay the Spire combat. Players manage a superhero organization defending the remnants of America against three hostile factions.</p>
+            </div>
+
+            <h3>Core Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Target Campaign Length</td>
+                    <td>~10 hours</td>
+                </tr>
+                <tr>
+                    <td>Heroes per Combat</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>Cards per Hero</td>
+                    <td>5-10</td>
+                </tr>
+                <tr>
+                    <td>Combined Deck Size</td>
+                    <td>15-30 cards</td>
+                </tr>
+                <tr>
+                    <td>Max Roster Size</td>
+                    <td>10-12 heroes</td>
+                </tr>
+                <tr>
+                    <td>Campaign Acts</td>
+                    <td>3</td>
+                </tr>
+            </table>
+
+            <h3>Core Loop</h3>
+            <div class="diagram">Strategic Map Management
+        ↓
+   Mission Selection
+        ↓
+  Deckbuilder Combat
+        ↓
+  Rewards / Recovery
+        ↓
+      Repeat</div>
+        </section>
+
+        <!-- SETTING -->
+        <section id="setting">
+            <h2>Setting</h2>
+
+            <p>The player runs a Justice League-style superhero organization. The Midwestern United States represents the last bastion of humanity, besieged on all sides by three hostile factions that emerged from "the Veil"—a tear in reality through which nightmarish threats pour.</p>
+
+            <p>There is no winning this war permanently. The best the player can hope for is to prevent each faction's apocalyptic plans as they arise, buying humanity another day to survive.</p>
+        </section>
+
+        <!-- FACTIONS -->
+        <section id="factions">
+            <h2>Enemy Factions</h2>
+
+            <p>All three factions originate from the Veil and remain active throughout the campaign. Each has distinct aesthetics, mechanics, and territory.</p>
+
+            <div class="faction-card cult">
+                <h4>Cult of the Veil</h4>
+                <p><strong>Territory:</strong> Southern States</p>
+                <p><strong>Theme:</strong> Lovecraftian horrors, reality-warping entities, fanatical cultists</p>
+                <p><strong>Combat Style:</strong> Psychic attacks, debuffs, sanity erosion, summoning rituals</p>
+                <p><strong>Signature Mechanics:</strong></p>
+                <ul>
+                    <li>Apply stacking mental debuffs that trigger at thresholds</li>
+                    <li>Summon increasingly powerful entities over time</li>
+                    <li>Cards that punish large hands or specific card types</li>
+                </ul>
+            </div>
+
+            <div class="faction-card undead">
+                <h4>The Undead Horde</h4>
+                <p><strong>Territory:</strong> Eastern States</p>
+                <p><strong>Theme:</strong> Necromancers, revenants, death knights, skeletal legions</p>
+                <p><strong>Combat Style:</strong> Attrition warfare, life drain, resurrection, inevitability</p>
+                <p><strong>Signature Mechanics:</strong></p>
+                <ul>
+                    <li>Enemies resurrect unless killed with specific damage types</li>
+                    <li>Life drain heals the enemy while damaging heroes</li>
+                    <li>Death triggers that strengthen remaining enemies</li>
+                </ul>
+            </div>
+
+            <div class="faction-card swarm">
+                <h4>The Swarm</h4>
+                <p><strong>Territory:</strong> Western States</p>
+                <p><strong>Theme:</strong> Alien bugs (Zerg-style), hive minds, overwhelming numbers</p>
+                <p><strong>Combat Style:</strong> Poison, swarm mechanics, rapid spawning, sacrifice tactics</p>
+                <p><strong>Signature Mechanics:</strong></p>
+                <ul>
+                    <li>Rapidly spawn weak enemies that buff each other</li>
+                    <li>Stacking poison that grows each turn</li>
+                    <li>Sacrifice smaller units to empower larger ones</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- CAMPAIGN STRUCTURE -->
+        <section id="campaign">
+            <h2>Campaign Structure</h2>
+
+            <p>The campaign follows a three-act structure similar to Slay the Spire, but with rotating faction focus:</p>
+
+            <div class="info-box">
+                <h4>Act 1</h4>
+                <p>One faction pursues an apocalyptic plan. The player must stop it via story missions.</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Act 2</h4>
+                <p>A different faction's apocalyptic plan becomes the primary threat.</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Act 3</h4>
+                <p>The third faction's plan threatens to end everything.</p>
+            </div>
+
+            <p><strong>Important:</strong> All factions remain active throughout the entire campaign. The act structure only determines which faction's <em>story missions</em> are currently relevant. Defense missions from any faction can occur at any time.</p>
+
+            <div class="info-box warning">
+                <p><strong>Campaign End:</strong> After completing Act 3, the campaign ends. There is no "happily ever after"—just "the immediate crisis is over, the war continues." The ending reflects the reality that this is a holding action, not a victory.</p>
+            </div>
+        </section>
+
+        <!-- STRATEGIC RESOURCES -->
+        <section id="resources">
+            <h2>Strategic Resources</h2>
+
+            <h3>Money</h3>
+            <p>Universal spending currency for the strategic layer.</p>
+            <ul>
+                <li><strong>Generated by:</strong> Controlled territories, mission rewards</li>
+                <li><strong>Spent at:</strong> The Bazaar (recruitment, upgrades, training)</li>
+            </ul>
+
+            <h3>Time</h3>
+            <p>Implicit resource that creates strategic tension.</p>
+            <ul>
+                <li>Heroes are unavailable during travel, training, and recovery</li>
+                <li>Missions have expiration timers</li>
+                <li>Story missions must be completed before doom counter fills</li>
+            </ul>
+
+            <h3>Personnel</h3>
+            <p>Your hero roster—the most valuable resource.</p>
+            <ul>
+                <li>Limited by barracks capacity</li>
+                <li>Permanently lost on death</li>
+                <li>Each hero represents significant investment</li>
+            </ul>
+
+            <h3>Territories</h3>
+            <p>Your holdings on the strategic map.</p>
+            <ul>
+                <li>Generate money and may have special bonuses</li>
+                <li>Define your defensive perimeter</li>
+                <li>Can be lost to enemy attacks</li>
+            </ul>
+        </section>
+
+        <!-- STRATEGIC MAP -->
+        <section id="map">
+            <h2>Strategic Map</h2>
+
+            <h3>Territory Overview</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Total Territories</td>
+                    <td>~20</td>
+                </tr>
+                <tr>
+                    <td>Player-Controlled</td>
+                    <td>4-7 at any time</td>
+                </tr>
+                <tr>
+                    <td>Landmark Territories</td>
+                    <td>4-5</td>
+                </tr>
+            </table>
+
+            <p>Player holdings are clustered together. The borders with enemy territory form "front lines" where defense missions spawn.</p>
+
+            <h3>Landmark Territories</h3>
+            <p>Special territories that provide unique benefits and are high-priority targets for enemies:</p>
+
+            <table>
+                <tr>
+                    <th>Landmark</th>
+                    <th>Benefit</th>
+                </tr>
+                <tr>
+                    <td>The Foundry</td>
+                    <td>Extra money generation, high-priority enemy target</td>
+                </tr>
+                <tr>
+                    <td>The Academy</td>
+                    <td>Reduced training time for hero upgrades</td>
+                </tr>
+                <tr>
+                    <td>The Sanctuary</td>
+                    <td>Faster stress recovery for heroes</td>
+                </tr>
+                <tr>
+                    <td>The Listening Post</td>
+                    <td>Advance warning of incoming attacks</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- HEAT SYSTEM -->
+        <section id="heat">
+            <h2>Faction Heat System</h2>
+
+            <p>Each faction has a <strong>heat meter</strong> representing their aggression toward the player organization.</p>
+
+            <div class="info-box highlight">
+                <h4>Heat Mechanics</h4>
+                <ul>
+                    <li><strong>Increased by:</strong> Actions against that faction (story missions, killing their units)</li>
+                    <li><strong>Decreased by:</strong> Successful defense against that faction's attacks</li>
+                    <li><strong>Effect:</strong> Higher heat = more frequent attacks from that faction</li>
+                </ul>
+            </div>
+
+            <h3>Design Purpose</h3>
+            <p>The heat system prevents "ignore two factions, crush one" strategies. Players must manage attention across all three threats, creating a juggling dynamic where focusing too heavily on one faction causes the others to become more dangerous.</p>
+        </section>
+
+        <!-- MISSION TYPES -->
+        <section id="missions">
+            <h2>Mission Types</h2>
+
+            <h3>Defense Missions</h3>
+            <div class="info-box">
+                <ul>
+                    <li>Spawn at front lines when a faction attacks</li>
+                    <li>Single combat encounter</li>
+                    <li><strong>Failure:</strong> Lose the territory</li>
+                </ul>
+            </div>
+
+            <h3>Story Missions</h3>
+            <div class="info-box">
+                <ul>
+                    <li>2-3 combat encounters in sequence</li>
+                    <li>Faction-specific narrative content</li>
+                    <li>Advance the current act's storyline</li>
+                    <li><strong>Failure:</strong> Advances doom counter; can retry until mission expires</li>
+                    <li><strong>Expiration:</strong> Game over</li>
+                </ul>
+            </div>
+
+            <h3>Capture Missions</h3>
+            <div class="info-box">
+                <ul>
+                    <li>Opportunistic expansion missions</li>
+                    <li>Spawn occasionally on the map edge</li>
+                    <li>Taking new territory extends your defensive perimeter</li>
+                    <li>Risk/reward: More territory = more resources but harder to defend</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- DOOM COUNTER -->
+        <section id="doom">
+            <h2>Doom Counter</h2>
+
+            <p>Each act has a <strong>doom counter</strong> tied to the featured faction's apocalyptic plan.</p>
+
+            <div class="info-box warning">
+                <ul>
+                    <li>Story mission failures advance the doom counter</li>
+                    <li>If the counter fills completely, <strong>game over</strong></li>
+                    <li>Functions as a "retry budget" for story missions</li>
+                    <li>Creates tension: How many times can you afford to fail?</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- BAZAAR -->
+        <section id="bazaar">
+            <h2>Bazaar System</h2>
+
+            <p>The Bazaar refreshes monthly with randomized purchasable options:</p>
+
+            <ul>
+                <li><strong>New Heroes:</strong> Arrive with some cards pre-loaded</li>
+                <li><strong>Techniques/Strategies:</strong> Organizational upgrades</li>
+                <li><strong>Training Opportunities:</strong> Ways to upgrade existing heroes</li>
+            </ul>
+
+            <div class="info-box highlight">
+                <p><strong>Design Note:</strong> The randomized selection creates "buy now or wait" decisions. This is <em>not</em> a tech tree—it's a roulette. Sometimes the perfect recruit appears when you're broke. Sometimes you have money but nothing good is available.</p>
+            </div>
+
+            <h3>Training</h3>
+            <ul>
+                <li>Heroes can train to upgrade cards in their deck</li>
+                <li>Training costs money and makes the hero unavailable</li>
+                <li>Upgrades are randomized "proposals"—player picks from options</li>
+                <li><strong>Core Tradeoff:</strong> Train your best heroes (lose access to them) or train B-listers?</li>
+            </ul>
+        </section>
+
+        <!-- HEROES -->
+        <section id="heroes">
+            <h2>Hero System</h2>
+
+            <p>Heroes are the core asset of your organization. Each hero is a significant investment that can be permanently lost.</p>
+
+            <h3>Hero Components</h3>
+            <ul>
+                <li><strong>Class:</strong> Determines card pool and combat role</li>
+                <li><strong>Personal Deck:</strong> 5-10 cards unique to that hero</li>
+                <li><strong>Stress Level:</strong> Accumulates with deployment</li>
+                <li><strong>Trauma Cards:</strong> Permanent penalties from breakdowns</li>
+                <li><strong>Resistances:</strong> Faction-specific tolerances</li>
+            </ul>
+
+            <h3>Hero Decks</h3>
+            <p>Each hero maintains an individual deck:</p>
+            <ul>
+                <li><strong>Starting Size:</strong> 5 cards (4 basics + 1 random common)</li>
+                <li><strong>Maximum Size:</strong> ~10 cards</li>
+                <li><strong>Growth:</strong> Card rewards after missions (not individual combats)</li>
+                <li>Two heroes of the same class play similarly but not identically</li>
+            </ul>
+        </section>
+
+        <!-- CLASSES -->
+        <section id="classes">
+            <h2>Hero Classes</h2>
+
+            <p>Classes are based on Worm power classifications. Each class has a distinct card pool, primary/secondary resource scaling, and can generate any of the five combat resources.</p>
+
+            <div class="class-section brute">
+                <h3>Brute</h3>
+                <p>Tank and damage dealer. High health pool with cards that absorb hits and punish enemies for attacking.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Tank / Damage</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Blood</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Iron</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Absorb damage, build up resources through punishment, unleash devastating counterattacks.</p>
+            </div>
+
+            <div class="class-section blaster">
+                <h3>Blaster</h3>
+                <p>Ranged damage dealer. Straightforward offensive powerhouse with energy projection.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Damage Dealer</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Ashes</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Blood</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Direct damage, area attacks, building toward massive finisher moves.</p>
+            </div>
+
+            <div class="class-section tinker">
+                <h3>Tinker</h3>
+                <p>Buildup class with gadgets and persistent effects. Slow start but extremely powerful late in combat.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Buildup / Control</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Pages</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Glint</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Deploy gadgets and constructs early, gain compounding advantages, dominate long fights.</p>
+            </div>
+
+            <div class="class-section thinker">
+                <h3>Thinker</h3>
+                <p>Card manipulation and support. Weak solo but massive force multiplier for the team.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Support / Control</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Glint</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Pages</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Draw cards, scry, manipulate the deck, set up perfect turns for allies.</p>
+            </div>
+
+            <div class="class-section mover">
+                <h3>Mover</h3>
+                <p>Positioning and evasion specialist. Avoids attacks and redirects enemy attention.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Evasion / Utility</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Glint</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Iron</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Dodge attacks entirely, reposition threats, protect vulnerable allies through misdirection.</p>
+            </div>
+
+            <div class="class-section stranger">
+                <h3>Stranger</h3>
+                <p>Stealth and misdirection master. Reduces threat profile and strikes from ambush.</p>
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <span class="class-stat-label">Role</span>
+                        <span class="class-stat-value">Stealth / Burst</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Primary Scaling</span>
+                        <span class="class-stat-value">Ashes</span>
+                    </div>
+                    <div class="class-stat">
+                        <span class="class-stat-label">Secondary Scaling</span>
+                        <span class="class-stat-value">Glint</span>
+                    </div>
+                </div>
+                <p><strong>Playstyle:</strong> Stay hidden, build up ambush bonuses, strike for massive damage when the moment is right.</p>
+            </div>
+        </section>
+
+        <!-- ROSTER MANAGEMENT -->
+        <section id="roster">
+            <h2>Roster Management</h2>
+
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Barracks Cap</td>
+                    <td>10-12 heroes maximum</td>
+                </tr>
+                <tr>
+                    <td>Starting Roster</td>
+                    <td>TBD (fixed, randomized, or draft)</td>
+                </tr>
+                <tr>
+                    <td>Starting Deck per Hero</td>
+                    <td>4 basics + 1 random common</td>
+                </tr>
+            </table>
+
+            <h3>Recruitment</h3>
+            <p>New heroes are recruited via the Bazaar. They arrive with cards pre-loaded (4 basics + random common cards based on their class).</p>
+
+            <h3>Permadeath</h3>
+            <p>Heroes can die in combat. Death is permanent—there is no resurrection, no second chances. The investment in that hero's deck, training, and experience is lost.</p>
+
+            <h3>Dismissal</h3>
+            <p>Players may need to dismiss heroes to make room for new recruits. This creates difficult decisions about roster composition.</p>
+        </section>
+
+        <!-- STRESS SYSTEM -->
+        <section id="stress">
+            <h2>Stress & Trauma System</h2>
+
+            <h3>Stress</h3>
+            <ul>
+                <li>Accumulates per deployment and based on combat events</li>
+                <li>Prevents overusing your "A-team"</li>
+                <li>High stress increases risk of breakdown</li>
+            </ul>
+
+            <h3>Breakdown</h3>
+            <p>If a hero is pushed too far, they suffer a breakdown and gain a permanent <strong>Trauma card</strong> added to their deck.</p>
+
+            <div class="info-box warning">
+                <h4>Trauma Cards</h4>
+                <ul>
+                    <li>Function like curse cards—negative effects when drawn</li>
+                    <li>Varied effects (specific effects TBD)</li>
+                    <li><strong>Cannot be removed</strong>—accumulated trauma is permanent</li>
+                    <li>Eventually makes heroes less viable over time</li>
+                </ul>
+            </div>
+
+            <h3>Design Purpose</h3>
+            <p>Creates character arcs: Veterans are powerful but carry scars. A hero who has survived dozens of missions will have a larger, more powerful deck but also accumulated trauma that weighs them down. Eventually, even the greatest heroes become liabilities.</p>
+        </section>
+
+        <!-- RESISTANCES -->
+        <section id="resistances">
+            <h2>Faction Resistances</h2>
+
+            <p>Heroes develop resistances through exposure to specific factions:</p>
+
+            <ul>
+                <li>A veteran cult-fighter develops <strong>mental fortitude</strong> against psychic attacks</li>
+                <li>A bug specialist builds <strong>toxin tolerance</strong> against Swarm poison</li>
+                <li>An undead hunter gains <strong>death's defiance</strong> against life drain</li>
+            </ul>
+
+            <div class="info-box highlight">
+                <p><strong>Design Purpose:</strong> Creates "who to send" decisions beyond raw power. Your strongest hero might not be the best choice for a Cult mission if they have no mental resistance. Specialization matters.</p>
+            </div>
+        </section>
+
+        <!-- COMBAT SYSTEM -->
+        <section id="combat">
+            <h2>Combat System</h2>
+
+            <p>Slay the Spire-style combat with merged hero decks.</p>
+
+            <h3>Core Structure</h3>
+            <ol>
+                <li>Take <strong>3 heroes</strong> into combat</li>
+                <li>Mash all three decks together into one <strong>combined draw pile</strong></li>
+                <li>Draw a hand, spend energy, play cards</li>
+                <li>Enemies telegraph their intents</li>
+                <li>End turn—enemies act</li>
+                <li>Repeat until victory or defeat</li>
+            </ol>
+
+            <div class="info-box highlight">
+                <p><strong>Key Distinction:</strong> This is a shared turn, not per-hero turns. All heroes act simultaneously, and any card in hand can be played regardless of which hero it belongs to.</p>
+            </div>
+
+            <h3>Deck Composition</h3>
+            <ul>
+                <li><strong>Combined Size:</strong> 15-30 cards (3 heroes × 5-10 cards each)</li>
+                <li>Small enough for consistency</li>
+                <li>Large enough for variety and strategic deck-building</li>
+            </ul>
+        </section>
+
+        <!-- COMBAT RESOURCES -->
+        <section id="combat-resources">
+            <h2>Combat Resources</h2>
+
+            <p>Five abstract resources that <strong>persist across turns</strong> (similar to Strength in StS, but more central to gameplay):</p>
+
+            <div class="resource-list">
+                <div class="resource-item blood">
+                    <h4>Blood</h4>
+                    <p>Vitality, sacrifice, cost. Associated with life force and paying prices for power.</p>
+                </div>
+
+                <div class="resource-item glint">
+                    <h4>Glint</h4>
+                    <p>Perception, opportunity, insight. Associated with awareness and seizing moments.</p>
+                </div>
+
+                <div class="resource-item ashes">
+                    <h4>Ashes</h4>
+                    <p>Destruction, entropy, aftermath. Associated with damage dealt and things destroyed.</p>
+                </div>
+
+                <div class="resource-item pages">
+                    <h4>Pages</h4>
+                    <p>Knowledge, preparation, plans. Associated with information and setup.</p>
+                </div>
+
+                <div class="resource-item iron">
+                    <h4>Iron</h4>
+                    <p>Will, endurance, resolve. Associated with defense and persistence.</p>
+                </div>
+            </div>
+
+            <h3>Resource System Design</h3>
+
+            <div class="info-box highlight">
+                <h4>Key Principle: Generation is Distributed, Scaling is Specialized</h4>
+                <p><strong>Generation:</strong> Any class can generate any resource. Generator cards exist across all classes, often as card upgrades.</p>
+                <p><strong>Scaling:</strong> Class-specific. Each class scales 1-2 resources. Cards read "Deal 5 + <span class="resource blood">Blood</span> damage" or "Gain 4 + <span class="resource iron">Iron</span> block."</p>
+            </div>
+
+            <p>This creates team composition decisions: Match generators to scalers. A Brute who scales Blood wants teammates who can generate Blood.</p>
+
+            <h3>Baseline Resource Sinks</h3>
+            <p>Each resource has a universal ability available to any team (costs 1 energy + 3 resource):</p>
+
+            <table>
+                <tr>
+                    <th>Resource</th>
+                    <th>Baseline Ability</th>
+                </tr>
+                <tr>
+                    <td><span class="resource blood">Blood</span></td>
+                    <td>Deal 8 damage to any enemy</td>
+                </tr>
+                <tr>
+                    <td><span class="resource glint">Glint</span></td>
+                    <td>Draw 2 cards</td>
+                </tr>
+                <tr>
+                    <td><span class="resource ashes">Ashes</span></td>
+                    <td>Exhaust a card from hand</td>
+                </tr>
+                <tr>
+                    <td><span class="resource pages">Pages</span></td>
+                    <td>[TBD]</td>
+                </tr>
+                <tr>
+                    <td><span class="resource iron">Iron</span></td>
+                    <td>Gain 8 block</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- CARD DESIGN -->
+        <section id="card-design">
+            <h2>Card Design Principles</h2>
+
+            <h3>No Dead Cards</h3>
+            <p>Every card does something useful <em>independent</em> of resources. Resources provide bonuses, not gates.</p>
+
+            <div class="info-box">
+                <h4>Example Card Patterns</h4>
+                <ul>
+                    <li>"Deal 6 damage. If you have 3+ <span class="resource blood">Blood</span>, deal 10 instead."</li>
+                    <li>"Gain 5 block. Spend up to 3 <span class="resource iron">Iron</span>: gain 2 block per Iron spent."</li>
+                    <li>"Draw 2 cards. +1 card per <span class="resource glint">Glint</span>."</li>
+                </ul>
+            </div>
+
+            <h3>No Orphaned Resources</h3>
+            <p>The baseline sink abilities ensure every resource has value, even if no hero on the team specializes in it.</p>
+
+            <h3>Card Upgrades</h3>
+            <p>Monster Train style: Cards can have upgrades "baked in" when acquired. The player doesn't choose upgrades—the card comes with them pre-applied.</p>
+
+            <div class="info-box">
+                <h4>Example Upgrade Types</h4>
+                <ul>
+                    <li>"This card generates 2 <span class="resource blood">Blood</span>."</li>
+                    <li>"This card generates 3 <span class="resource glint">Glint</span> then consumes."</li>
+                    <li>"This card costs 1 less energy."</li>
+                    <li>"This card has +3 base damage."</li>
+                </ul>
+            </div>
+
+            <h3>Thinning Policy</h3>
+            <p>Limited or no deck thinning. At 5-10 card deck sizes per hero, thinning would be too powerful.</p>
+
+            <p>Options under consideration:</p>
+            <ul>
+                <li>No thinning (decks only grow)</li>
+                <li>Very limited thinning (rare/expensive)</li>
+                <li>Transformation only (upgrade basics, can't delete)</li>
+            </ul>
+        </section>
+
+        <!-- HERO DEATH -->
+        <section id="death">
+            <h2>Hero Death in Combat</h2>
+
+            <p>When a hero falls mid-combat:</p>
+
+            <ul>
+                <li>Their cards <strong>stop appearing</strong> in future draws</li>
+                <li>Cards already in hand or discard <strong>remain</strong> (become dead draws)</li>
+                <li>Combat continues with remaining heroes</li>
+            </ul>
+
+            <div class="info-box warning">
+                <p><strong>Timing Matters:</strong> Losing someone early in combat is devastating—their entire deck becomes dead draws. Losing someone late may barely matter if most of their cards have already been played.</p>
+            </div>
+        </section>
+
+        <!-- RETREAT & VICTORY -->
+        <section id="retreat">
+            <h2>Retreat & Pyrrhic Victories</h2>
+
+            <h3>Retreat Mechanics</h3>
+            <ul>
+                <li>Costs <strong>3 energy</strong> to initiate</li>
+                <li>Enemies get their telegraphed attack (one final hit)</li>
+                <li>Surviving team members take stress</li>
+                <li>Available during story missions—can retreat from one combat and attempt the next, or abort entirely</li>
+            </ul>
+
+            <h3>Pyrrhic Victories</h3>
+            <p>The combat system is designed for "rubber-banding"—partial success states:</p>
+
+            <ul>
+                <li>Losing a hero doesn't automatically mean losing the combat</li>
+                <li>Surviving with losses is a valid (and sometimes optimal) outcome</li>
+                <li>Creates dramatic "we won, but at what cost" moments</li>
+            </ul>
+
+            <div class="info-box highlight">
+                <p><strong>Design Goal:</strong> Combat should feel tense throughout, with meaningful decisions about when to play it safe vs. push for advantage. Losing should hurt but not immediately end the run.</p>
+            </div>
+        </section>
+
+        <!-- CARD REWARDS -->
+        <section id="card-rewards">
+            <h2>Card Rewards</h2>
+
+            <ul>
+                <li>Granted <strong>per mission</strong>, not per individual combat</li>
+                <li>After mission completion, each participating hero gets a choice</li>
+                <li><strong>Choice format:</strong> Pick from 3 randomized bundles</li>
+                <li><strong>Bundle contents:</strong> Card(s) + possibly passive buffs</li>
+                <li>Available cards based on hero's class</li>
+            </ul>
+        </section>
+
+        <!-- BRUTE CARDS -->
+        <section id="brute-cards">
+            <h2>Brute Starter Cards</h2>
+
+            <p>The Brute's starting deck focuses on absorbing damage and building <span class="resource blood">Blood</span> through punishment.</p>
+
+            <div class="cards-grid">
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Haymaker</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 6 damage. Deal +<span class="resource blood">Blood</span> additional damage.
+                    </div>
+                    <div class="card-flavor">"Stay down."</div>
+                </div>
+
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Brace</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 5 block. Gain +<span class="resource iron">Iron</span> additional block.
+                    </div>
+                    <div class="card-flavor">"I can take it."</div>
+                </div>
+
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Retaliate</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 3 block. When you take damage this turn, generate 1 <span class="resource blood">Blood</span>.
+                    </div>
+                    <div class="card-flavor">"Hit me. I dare you."</div>
+                </div>
+
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Bulk Up</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 4 block. Generate 1 <span class="resource iron">Iron</span>.
+                    </div>
+                    <div class="card-flavor">"Getting stronger every day."</div>
+                </div>
+
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Reckless Charge</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 10 damage. Take 3 damage. Generate 2 <span class="resource blood">Blood</span>.
+                    </div>
+                    <div class="card-flavor">"Pain is just weakness leaving the body."</div>
+                </div>
+
+                <div class="game-card brute">
+                    <div class="card-header">
+                        <span class="card-name">Immovable</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Skill</div>
+                    <div class="card-effect">
+                        Gain 12 block. If you have 4+ <span class="resource iron">Iron</span>, gain 6 additional block.
+                    </div>
+                    <div class="card-flavor">"I'm not going anywhere."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLASTER CARDS -->
+        <section id="blaster-cards">
+            <h2>Blaster Starter Cards</h2>
+
+            <p>The Blaster's starting deck focuses on dealing direct damage and building toward devastating finishers using <span class="resource ashes">Ashes</span>.</p>
+
+            <div class="cards-grid">
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Energy Bolt</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 7 damage. Deal +<span class="resource ashes">Ashes</span> additional damage.
+                    </div>
+                    <div class="card-flavor">"Clean. Simple. Effective."</div>
+                </div>
+
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Energy Shield</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 4 block. Generate 1 <span class="resource ashes">Ashes</span>.
+                    </div>
+                    <div class="card-flavor">"Defense is just offense waiting to happen."</div>
+                </div>
+
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Searing Ray</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 5 damage. If this kills an enemy, generate 2 <span class="resource ashes">Ashes</span>.
+                    </div>
+                    <div class="card-flavor">"Nothing left but cinders."</div>
+                </div>
+
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Charge Shot</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 4 damage. Generate 1 <span class="resource blood">Blood</span>.
+                    </div>
+                    <div class="card-flavor">"Building up to something big."</div>
+                </div>
+
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Scatter Blast</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 4 damage to ALL enemies. Generate 1 <span class="resource ashes">Ashes</span> for each enemy hit.
+                    </div>
+                    <div class="card-flavor">"Nowhere to hide."</div>
+                </div>
+
+                <div class="game-card blaster">
+                    <div class="card-header">
+                        <span class="card-name">Nova Burst</span>
+                        <span class="card-cost">3</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 8 damage. If you have 5+ <span class="resource ashes">Ashes</span>, deal 16 damage instead.
+                    </div>
+                    <div class="card-flavor">"This ends now."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TINKER CARDS -->
+        <section id="tinker-cards">
+            <h2>Tinker Starter Cards</h2>
+
+            <p>The Tinker's starting deck focuses on deploying gadgets and building advantages over time using <span class="resource pages">Pages</span>.</p>
+
+            <div class="cards-grid">
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Jury-Rig</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 4 block. Generate 1 <span class="resource pages">Pages</span>.
+                    </div>
+                    <div class="card-flavor">"Give me a minute and some duct tape."</div>
+                </div>
+
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Zap Gun</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 5 damage. Deal +<span class="resource pages">Pages</span> additional damage.
+                    </div>
+                    <div class="card-flavor">"Prototype 47. This one probably won't explode."</div>
+                </div>
+
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Deploy Turret</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        At the end of your turn, deal 2 damage to a random enemy. (Lasts 3 turns)
+                    </div>
+                    <div class="card-flavor">"Automated defense systems online."</div>
+                </div>
+
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Analyze</span>
+                        <span class="card-cost">0</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Generate 1 <span class="resource glint">Glint</span> and 1 <span class="resource pages">Pages</span>. Draw 1 card.
+                    </div>
+                    <div class="card-flavor">"Interesting. Very interesting."</div>
+                </div>
+
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Shield Generator</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Skill</div>
+                    <div class="card-effect">
+                        At the start of each turn, gain 3 block. Gain +1 block per <span class="resource pages">Pages</span>. (Lasts 3 turns)
+                    </div>
+                    <div class="card-flavor">"Sustainable defense beats brute force."</div>
+                </div>
+
+                <div class="game-card tinker">
+                    <div class="card-header">
+                        <span class="card-name">Overload</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 3 damage for each gadget you have deployed. Generate 2 <span class="resource ashes">Ashes</span>.
+                    </div>
+                    <div class="card-flavor">"All systems: maximum output."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THINKER CARDS -->
+        <section id="thinker-cards">
+            <h2>Thinker Starter Cards</h2>
+
+            <p>The Thinker's starting deck focuses on card manipulation and team support using <span class="resource glint">Glint</span>.</p>
+
+            <div class="cards-grid">
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Insight</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Draw 2 cards. Generate 1 <span class="resource glint">Glint</span>.
+                    </div>
+                    <div class="card-flavor">"I see exactly what we need."</div>
+                </div>
+
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Calculated Strike</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 4 damage. Deal +<span class="resource glint">Glint</span> × 2 additional damage.
+                    </div>
+                    <div class="card-flavor">"Precision over power."</div>
+                </div>
+
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Precognition</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Scry 3. Gain 3 block. If you discarded a card, generate 1 <span class="resource glint">Glint</span>.
+                    </div>
+                    <div class="card-flavor">"I know what's coming."</div>
+                </div>
+
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Coordinate</span>
+                        <span class="card-cost">0</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        The next card you play this turn costs 1 less. Generate 1 <span class="resource pages">Pages</span>.
+                    </div>
+                    <div class="card-flavor">"Everyone in position. Now."</div>
+                </div>
+
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Perfect Timing</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Common Skill</div>
+                    <div class="card-effect">
+                        Draw 1 card. +1 card per <span class="resource glint">Glint</span> (max 4). If you drew 4+ cards, gain 1 energy.
+                    </div>
+                    <div class="card-flavor">"Patience. Wait for it..."</div>
+                </div>
+
+                <div class="game-card thinker">
+                    <div class="card-header">
+                        <span class="card-name">Tactical Analysis</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Skill</div>
+                    <div class="card-effect">
+                        Generate 2 <span class="resource glint">Glint</span>. All allies deal +2 damage this turn.
+                    </div>
+                    <div class="card-flavor">"Their weakness is... there."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MOVER CARDS -->
+        <section id="mover-cards">
+            <h2>Mover Starter Cards</h2>
+
+            <p>The Mover's starting deck focuses on evasion and positioning using <span class="resource glint">Glint</span> and <span class="resource iron">Iron</span>.</p>
+
+            <div class="cards-grid">
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Dash</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 5 block. Generate 1 <span class="resource glint">Glint</span>.
+                    </div>
+                    <div class="card-flavor">"Can't hit what you can't catch."</div>
+                </div>
+
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Hit and Run</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 5 damage. Gain 3 block. Deal +<span class="resource glint">Glint</span> additional damage.
+                    </div>
+                    <div class="card-flavor">"In, out, done."</div>
+                </div>
+
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Sidestep</span>
+                        <span class="card-cost">0</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 2 block. Draw 1 card.
+                    </div>
+                    <div class="card-flavor">"Too slow."</div>
+                </div>
+
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Redirect</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        The next attack targeting an ally targets a different random enemy instead. Generate 1 <span class="resource iron">Iron</span>.
+                    </div>
+                    <div class="card-flavor">"Wrong target."</div>
+                </div>
+
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Blur</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Skill</div>
+                    <div class="card-effect">
+                        Gain 8 block. If you have 3+ <span class="resource glint">Glint</span>, become Untargetable until your next turn.
+                    </div>
+                    <div class="card-flavor">"Now you see me..."</div>
+                </div>
+
+                <div class="game-card mover">
+                    <div class="card-header">
+                        <span class="card-name">Momentum Strike</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 6 damage. Deal +2 damage for each card played this turn before this one.
+                    </div>
+                    <div class="card-flavor">"Building speed..."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STRANGER CARDS -->
+        <section id="stranger-cards">
+            <h2>Stranger Starter Cards</h2>
+
+            <p>The Stranger's starting deck focuses on stealth and ambush attacks using <span class="resource ashes">Ashes</span> and <span class="resource glint">Glint</span>.</p>
+
+            <div class="cards-grid">
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Backstab</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Attack</div>
+                    <div class="card-effect">
+                        Deal 5 damage. If you are Hidden, deal 10 damage instead.
+                    </div>
+                    <div class="card-flavor">"You never saw me coming."</div>
+                </div>
+
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Fade</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 3 block. Become Hidden. Generate 1 <span class="resource glint">Glint</span>.
+                    </div>
+                    <div class="card-flavor">"Where did they go?"</div>
+                </div>
+
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Misdirect</span>
+                        <span class="card-cost">1</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 4 block. Reduce this hero's Threat by 2. Generate 1 <span class="resource ashes">Ashes</span>.
+                    </div>
+                    <div class="card-flavor">"Look over there."</div>
+                </div>
+
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Slip Away</span>
+                        <span class="card-cost">0</span>
+                    </div>
+                    <div class="card-type">Basic Skill</div>
+                    <div class="card-effect">
+                        Gain 2 block. If you are Hidden, draw 1 card.
+                    </div>
+                    <div class="card-flavor">"I was never here."</div>
+                </div>
+
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Shadow Strike</span>
+                        <span class="card-cost">2</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 8 damage. Deal +<span class="resource ashes">Ashes</span> additional damage. If this kills, become Hidden.
+                    </div>
+                    <div class="card-flavor">"One down, silent as the grave."</div>
+                </div>
+
+                <div class="game-card stranger">
+                    <div class="card-header">
+                        <span class="card-name">Ambush</span>
+                        <span class="card-cost">3</span>
+                    </div>
+                    <div class="card-type">Common Attack</div>
+                    <div class="card-effect">
+                        Deal 6 damage. If you are Hidden: deal 18 damage instead and generate 3 <span class="resource ashes">Ashes</span>.
+                    </div>
+                    <div class="card-flavor">"Surprise."</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DESIGN PILLARS -->
+        <section id="pillars">
+            <h2>Design Pillars</h2>
+
+            <div class="pillar">
+                <h4>1. Meaningful Loss</h4>
+                <p>Death, trauma, and territory loss matter but don't end runs immediately. With ~10 hour campaigns, losses sting without being hours of wasted investment. The war continues even when heroes fall.</p>
+            </div>
+
+            <div class="pillar">
+                <h4>2. Team Composition Matters</h4>
+                <p>Resource generation/scaling, faction resistances, and stress management make "who to send" a real decision. The right team for a mission isn't always your strongest heroes.</p>
+            </div>
+
+            <div class="pillar">
+                <h4>3. Strategic Triage</h4>
+                <p>You can't be everywhere. Heat management, doom counters, and limited personnel force hard choices. Sometimes you have to let a territory fall to save something more important.</p>
+            </div>
+
+            <div class="pillar">
+                <h4>4. No Dead Draws</h4>
+                <p>Every card does something. Resources enhance, not gate. You should never draw a card and feel it's completely useless in the current situation.</p>
+            </div>
+
+            <div class="pillar">
+                <h4>5. Emergent Narrative</h4>
+                <p>Veteran heroes accumulate trauma. Territories fall and are retaken. The campaign tells a story through systems, not just scripted events. Your war will be different from someone else's war.</p>
+            </div>
+        </section>
+
+        <!-- OPEN QUESTIONS -->
+        <section id="open-questions">
+            <h2>Open Questions / TBD</h2>
+
+            <ul>
+                <li>Exact starting roster composition (fixed, randomized, or draft?)</li>
+                <li>Passive time decay on heat vs. defense-only decay</li>
+                <li>Specific Trauma card effects</li>
+                <li><span class="resource pages">Pages</span> resource baseline effect</li>
+                <li>Exact territory bonuses beyond money</li>
+                <li>Event system / narrative tissue between missions</li>
+                <li>Rubber-banding mechanics for "losing but not dead" campaign states</li>
+                <li>Balance numbers throughout</li>
+                <li>Hidden status mechanics details (duration, break conditions)</li>
+                <li>Threat system mechanics (how targeting priority works)</li>
+                <li>Gadget/deployment mechanics (limit, stacking, removal)</li>
+            </ul>
+        </section>
+
+        <!-- UI/UX NOTES -->
+        <section id="ui-notes">
+            <h2>UI/UX Notes</h2>
+
+            <h3>Resource Display</h3>
+            <ul>
+                <li>Color-coded resource icons</li>
+                <li>Cards show scaling in resource colors: "Deal 5 + <span class="resource blood">[3]</span>" where red = Blood, 3 = current value</li>
+                <li>Generation shown with +, consumption with -, scaling with =</li>
+                <li>Deck viewer shows resource profile at a glance</li>
+            </ul>
+
+            <h3>Combat</h3>
+            <ul>
+                <li>Enemy intents visible (Slay the Spire style)</li>
+                <li>Combined deck is visible and countable</li>
+                <li>Resource pools clearly displayed</li>
+                <li>Baseline resource abilities accessible as buttons</li>
+            </ul>
+
+            <h3>Strategic Map</h3>
+            <ul>
+                <li>Territory control visible at a glance</li>
+                <li>Faction heat meters displayed prominently</li>
+                <li>Active missions clearly marked with timers</li>
+                <li>Hero availability status immediately apparent</li>
+            </ul>
+        </section>
+
+        <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+            <p>Superhero Long War - Game Design Specification v1.0</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">A roguelike deckbuilder combining XCOM-style strategy with Slay the Spire combat</p>
+        </footer>
+    </main>
 </body>
 </html>
