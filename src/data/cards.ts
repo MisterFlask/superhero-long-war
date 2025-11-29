@@ -500,10 +500,9 @@ export const thinkerCards: Card[] = [
         energyCost: 2,
         effect: {
             draw: 3,
-            generateResource: { type: ResourceType.Glint, amount: 3 },
-            generateResource: { type: ResourceType.Pages, amount: 2 }
+            generateResource: { type: ResourceType.Glint, amount: 3 }
         },
-        description: 'Draw 3 cards. Generate 3 Glint and 2 Pages.',
+        description: 'Draw 3 cards. Generate 3 Glint.',
         flavorText: '"Everything is proceeding according to plan."'
     }
 ];

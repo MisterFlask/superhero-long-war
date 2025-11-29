@@ -1,8 +1,10 @@
 import {
     GameState, GamePhase, Hero, Mission, CombatState, CardInstance,
     Enemy, ResourceType, HeroClass, Faction, StatusEffectType,
-    CombatPhase
+    CombatPhase, EnemyIntentType
 } from '../models/types.js';
+import { TooltipManager, STATUS_EFFECT_INFO, RESOURCE_INFO, HERO_CLASS_INFO } from './TooltipManager.js';
+import { CombatAnimationManager, CombatLog, TargetingManager, TargetType } from './CombatAnimations.js';
 
 // ============================================
 // UI RENDERER
@@ -11,15 +13,37 @@ import {
 export class GameRenderer {
     private container: HTMLElement;
     private onAction: (action: string, payload?: any) => void;
+    private tooltipManager: TooltipManager;
+    private animationManager: CombatAnimationManager;
+    private combatLog: CombatLog;
+    private targetingManager: TargetingManager;
 
     constructor(containerId: string, onAction: (action: string, payload?: any) => void) {
         const element = document.getElementById(containerId);
         if (!element) throw new Error(`Container ${containerId} not found`);
         this.container = element;
         this.onAction = onAction;
+        this.tooltipManager = new TooltipManager();
+        this.animationManager = new CombatAnimationManager();
+        this.combatLog = new CombatLog();
+        this.targetingManager = new TargetingManager();
+    }
+
+    // Public access for animation system
+    public getAnimationManager(): CombatAnimationManager {
+        return this.animationManager;
+    }
+
+    public getCombatLog(): CombatLog {
+        return this.combatLog;
     }
 
     render(state: GameState): void {
+        // Destroy combat log if leaving combat
+        if (state.phase !== GamePhase.Combat) {
+            this.combatLog.destroy();
+        }
+
         switch (state.phase) {
             case GamePhase.Strategic:
                 this.renderStrategic(state);
@@ -303,7 +327,7 @@ export class GameRenderer {
                         <span class="combat-progress">${state.currentCombatIndex + 1}/${state.activeMission?.combatCount}</span>
                     </div>
                     ${this.renderCombatResources(combat)}
-                    <div class="energy-display">
+                    <div class="energy-display" data-tooltip="energy">
                         <span class="energy-value">${combat.energy}</span>
                         <span class="energy-max">/ ${combat.maxEnergy}</span>
                         <span class="energy-label">Energy</span>
@@ -312,7 +336,7 @@ export class GameRenderer {
 
                 <div class="combat-arena">
                     <div class="enemies-row">
-                        ${combat.enemies.map(e => this.renderEnemyUnit(e)).join('')}
+                        ${combat.enemies.map(e => this.renderEnemyUnit(e, combat)).join('')}
                     </div>
 
                     <div class="combat-middle">
@@ -320,7 +344,7 @@ export class GameRenderer {
                     </div>
 
                     <div class="heroes-row">
-                        ${combat.heroes.map(h => this.renderCombatHero(h)).join('')}
+                        ${combat.heroes.map(h => this.renderCombatHero(h, combat)).join('')}
                     </div>
                 </div>
 
@@ -347,7 +371,11 @@ export class GameRenderer {
             </div>
         `;
 
+        // Initialize combat log
+        this.combatLog.initialize(this.container);
+
         this.bindCombatListeners(combat);
+        this.bindTooltipListeners(combat);
     }
 
     private renderCombatResources(combat: CombatState): string {
@@ -362,7 +390,11 @@ export class GameRenderer {
         return `
             <div class="combat-resources">
                 ${resources.map(r => `
-                    <div class="resource-display" style="--resource-color: ${r.color}">
+                    <div class="resource-display"
+                         style="--resource-color: ${r.color}"
+                         data-tooltip="resource"
+                         data-resource-type="${r.type}"
+                         data-resource-value="${combat.resources[r.type]}">
                         <span class="resource-icon">${r.icon}</span>
                         <span class="resource-value">${combat.resources[r.type]}</span>
                     </div>
@@ -371,15 +403,19 @@ export class GameRenderer {
         `;
     }
 
-    private renderEnemyUnit(enemy: Enemy): string {
+    private renderEnemyUnit(enemy: Enemy, combat?: CombatState): string {
         const hpPercent = (enemy.currentHp / enemy.maxHp) * 100;
         const isDead = enemy.currentHp <= 0;
         const block = enemy.statusEffects.find(s => s.type === StatusEffectType.Block);
 
         return `
             <div class="enemy-unit ${isDead ? 'dead' : ''} ${enemy.isBoss ? 'boss' : ''}"
-                 data-enemy-id="${enemy.id}">
-                <div class="enemy-intent">
+                 data-enemy-id="${enemy.id}"
+                 data-tooltip="enemy"
+                 data-enemy-name="${enemy.name}">
+                <div class="enemy-intent"
+                     data-tooltip="intent"
+                     data-enemy-id="${enemy.id}">
                     ${this.renderEnemyIntent(enemy)}
                 </div>
                 <div class="enemy-portrait">
@@ -387,7 +423,7 @@ export class GameRenderer {
                 </div>
                 <div class="enemy-name">${enemy.name}</div>
                 <div class="enemy-hp-bar">
-                    ${block ? `<div class="block-overlay">${block.stacks}</div>` : ''}
+                    ${block ? `<div class="block-overlay" data-tooltip="status" data-status-type="Block" data-status-stacks="${block.stacks}">${block.stacks}</div>` : ''}
                     <div class="hp-fill" style="width: ${hpPercent}%"></div>
                     <span class="hp-text">${enemy.currentHp}/${enemy.maxHp}</span>
                 </div>
@@ -417,7 +453,7 @@ export class GameRenderer {
         `;
     }
 
-    private renderCombatHero(hero: Hero): string {
+    private renderCombatHero(hero: Hero, combat?: CombatState): string {
         const hpPercent = (hero.currentHp / hero.maxHp) * 100;
         const isDead = hero.currentHp <= 0;
         const block = hero.statusEffects.find(s => s.type === StatusEffectType.Block);
@@ -426,14 +462,18 @@ export class GameRenderer {
         return `
             <div class="combat-hero ${isDead ? 'dead' : ''} ${isHidden ? 'hidden' : ''}"
                  data-hero-id="${hero.id}"
+                 data-tooltip="hero"
+                 data-hero-name="${hero.name}"
                  style="--class-color: ${this.getClassColor(hero.heroClass)}">
-                <div class="hero-portrait">
+                <div class="hero-portrait"
+                     data-tooltip="class"
+                     data-hero-class="${hero.heroClass}">
                     <span class="class-icon">${this.getClassIcon(hero.heroClass)}</span>
-                    ${isHidden ? '<div class="hidden-indicator">Hidden</div>' : ''}
+                    ${isHidden ? '<div class="hidden-indicator" data-tooltip="status" data-status-type="Hidden" data-status-stacks="1">Hidden</div>' : ''}
                 </div>
                 <div class="hero-name">${hero.name}</div>
                 <div class="hero-hp-bar">
-                    ${block ? `<div class="block-indicator">${block.stacks}</div>` : ''}
+                    ${block ? `<div class="block-indicator" data-tooltip="status" data-status-type="Block" data-status-stacks="${block.stacks}">${block.stacks}</div>` : ''}
                     <div class="hp-fill" style="width: ${hpPercent}%"></div>
                     <span class="hp-text">${hero.currentHp}/${hero.maxHp}</span>
                 </div>
@@ -449,10 +489,14 @@ export class GameRenderer {
                        card.energyCost <= combat.energy;
         const owner = combat.heroes.find(h => h.id === card.ownerId);
         const ownerDead = !owner || owner.currentHp <= 0;
+        const requiresTarget = card.effect.damage !== undefined && !card.effect.damageAll;
 
         return `
             <div class="hand-card ${canPlay && !ownerDead ? 'playable' : 'unplayable'}"
                  data-card-id="${card.instanceId}"
+                 data-card-name="${card.name}"
+                 data-tooltip="card"
+                 data-requires-target="${requiresTarget}"
                  style="--class-color: ${this.getClassColor(card.heroClass)}">
                 <div class="card-cost">${card.energyCost}</div>
                 <div class="card-name">${card.name}</div>
@@ -518,7 +562,12 @@ export class GameRenderer {
 
         return displayEffects.map(e => {
             const icon = this.getStatusIcon(e.type);
-            return `<span class="status-effect status-${e.type.toLowerCase()}" title="${e.type}: ${e.stacks}">
+            const info = STATUS_EFFECT_INFO[e.type as StatusEffectType];
+            const effectClass = info?.type || 'neutral';
+            return `<span class="status-effect status-${e.type.toLowerCase()} ${effectClass}"
+                         data-tooltip="status"
+                         data-status-type="${e.type}"
+                         data-status-stacks="${e.stacks}">
                 ${icon}${e.stacks}
             </span>`;
         }).join('');
@@ -792,7 +841,7 @@ export class GameRenderer {
         const selectedHeroes: string[] = [];
         const slots = this.container.querySelectorAll('.hero-slot');
         const heroes = this.container.querySelectorAll('.selectable-hero');
-        const startBtn = this.container.getElementById('startMissionBtn') as HTMLButtonElement;
+        const startBtn = this.container.querySelector('#startMissionBtn') as HTMLButtonElement;
 
         heroes.forEach(hero => {
             hero.addEventListener('click', () => {
@@ -844,7 +893,11 @@ export class GameRenderer {
     private bindCombatListeners(combat: CombatState): void {
         // Card playing
         this.container.querySelectorAll('.hand-card.playable').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                // Don't trigger card play if targeting manager is active
+                if (this.targetingManager.isActive()) return;
+
+                e.stopPropagation();
                 const cardId = (card as HTMLElement).dataset.cardId!;
                 const cardInstance = combat.hand.find(c => c.instanceId === cardId);
                 if (cardInstance) {
@@ -852,21 +905,12 @@ export class GameRenderer {
                     if (cardInstance.effect.damage !== undefined && !cardInstance.effect.damageAll) {
                         this.startTargeting(cardInstance, combat);
                     } else {
+                        // Animate card play
+                        this.animationManager.animateCardPlay(cardId);
+                        const owner = combat.heroes.find(h => h.id === cardInstance.ownerId);
+                        this.combatLog.logCardPlay(owner?.name || 'Hero', cardInstance.name);
                         this.onAction('playCard', { card: cardInstance });
                     }
-                }
-            });
-        });
-
-        // Enemy targeting
-        this.container.querySelectorAll('.enemy-unit:not(.dead)').forEach(enemy => {
-            enemy.addEventListener('click', () => {
-                if (combat.targetingMode) {
-                    const enemyId = (enemy as HTMLElement).dataset.enemyId!;
-                    this.onAction('playCard', {
-                        card: combat.targetingMode.card,
-                        targetId: enemyId
-                    });
                 }
             });
         });
@@ -875,10 +919,29 @@ export class GameRenderer {
     }
 
     private startTargeting(card: CardInstance, combat: CombatState): void {
-        combat.targetingMode = { card, validTargets: 'enemy' };
-        this.container.querySelectorAll('.enemy-unit:not(.dead)').forEach(e => {
-            e.classList.add('targetable');
+        const cardOwner = combat.heroes.find(h => h.id === card.ownerId);
+
+        this.targetingManager.startTargeting({
+            validTargets: 'enemy',
+            hintText: `Select a target for ${card.name}`,
+            callback: (targetId: string, targetType: TargetType) => {
+                // Animate card play
+                this.animationManager.animateCardPlay(card.instanceId);
+                this.combatLog.logCardPlay(cardOwner?.name || 'Hero', card.name);
+
+                this.onAction('playCard', {
+                    card: card,
+                    targetId: targetId
+                });
+            },
+            cancelCallback: () => {
+                // Clear targeting state
+                combat.targetingMode = null;
+            }
         });
+
+        // Also set the combat state targeting mode for backward compatibility
+        combat.targetingMode = { card, validTargets: 'enemy' };
     }
 
     private bindPostCombatListeners(state: GameState): void {
@@ -899,5 +962,140 @@ export class GameRenderer {
         });
 
         this.bindEventListeners();
+    }
+
+    // ============================================
+    // TOOLTIP BINDING
+    // ============================================
+
+    private bindTooltipListeners(combat: CombatState): void {
+        // Status effect tooltips
+        this.container.querySelectorAll('[data-tooltip="status"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const type = element.dataset.statusType as StatusEffectType;
+                const stacks = parseInt(element.dataset.statusStacks || '0');
+                const content = this.tooltipManager.generateStatusEffectTooltip(type, stacks);
+                this.tooltipManager.show(content, e.clientX, e.clientY);
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Resource tooltips
+        this.container.querySelectorAll('[data-tooltip="resource"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const type = element.dataset.resourceType as ResourceType;
+                const value = parseInt(element.dataset.resourceValue || '0');
+                const content = this.tooltipManager.generateResourceTooltip(type, value);
+                this.tooltipManager.show(content, e.clientX, e.clientY);
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Card tooltips
+        this.container.querySelectorAll('[data-tooltip="card"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const cardId = element.dataset.cardId;
+                const card = combat.hand.find(c => c.instanceId === cardId);
+                if (card) {
+                    const content = this.tooltipManager.generateCardTooltip(card, combat);
+                    this.tooltipManager.show(content, e.clientX, e.clientY);
+                }
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Hero tooltips
+        this.container.querySelectorAll('[data-tooltip="hero"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const heroId = element.dataset.heroId;
+                const hero = combat.heroes.find(h => h.id === heroId);
+                if (hero) {
+                    const content = this.tooltipManager.generateHeroTooltip(hero);
+                    this.tooltipManager.show(content, e.clientX, e.clientY);
+                }
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Hero class tooltips
+        this.container.querySelectorAll('[data-tooltip="class"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const heroClass = element.dataset.heroClass as HeroClass;
+                const content = this.tooltipManager.generateHeroClassTooltip(heroClass);
+                this.tooltipManager.show(content, e.clientX, e.clientY);
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Enemy tooltips
+        this.container.querySelectorAll('[data-tooltip="enemy"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const enemyId = element.dataset.enemyId;
+                const enemy = combat.enemies.find(en => en.id === enemyId);
+                if (enemy) {
+                    const content = this.tooltipManager.generateEnemyTooltip(enemy);
+                    this.tooltipManager.show(content, e.clientX, e.clientY);
+                }
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Intent tooltips
+        this.container.querySelectorAll('[data-tooltip="intent"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const enemyId = element.dataset.enemyId;
+                const enemy = combat.enemies.find(en => en.id === enemyId);
+                if (enemy) {
+                    const content = this.tooltipManager.generateIntentTooltip(enemy);
+                    this.tooltipManager.show(content, e.clientX, e.clientY);
+                }
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
+
+        // Energy tooltip
+        this.container.querySelectorAll('[data-tooltip="energy"]').forEach(el => {
+            const element = el as HTMLElement;
+            element.addEventListener('mouseenter', (e) => {
+                const content = `
+                    <div class="tooltip-title">Energy</div>
+                    <div class="tooltip-description">
+                        Energy is used to play cards. You start each turn with ${combat.maxEnergy} energy.
+                        Most cards cost 1-3 energy to play.
+                    </div>
+                    <div class="tooltip-stats">
+                        <div class="tooltip-stat">
+                            <span class="tooltip-stat-label">Current</span>
+                            <span class="tooltip-stat-value">${combat.energy}/${combat.maxEnergy}</span>
+                        </div>
+                    </div>
+                `;
+                this.tooltipManager.show(content, e.clientX, e.clientY);
+            });
+            element.addEventListener('mouseleave', () => {
+                this.tooltipManager.hideWithDelay();
+            });
+        });
     }
 }

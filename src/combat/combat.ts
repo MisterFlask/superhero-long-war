@@ -668,7 +668,8 @@ function applyBlockToTeam(state: CombatState, block: number): void {
 function calculateBlock(effect: any, resources: Resources): number {
     let block = effect.block || 0;
     if (effect.blockScaling) {
-        block += resources[effect.blockScaling.resource] * effect.blockScaling.multiplier;
+        const resourceType = effect.blockScaling.resource as ResourceType;
+        block += resources[resourceType] * effect.blockScaling.multiplier;
     }
     return block;
 }
