@@ -1,16 +1,15 @@
 import {
     GameState, GamePhase, Faction, Hero, Mission, CombatState,
-    CombatPhase, BazaarOffering, CardInstance, generateId, HeroClass
-} from '../models/types.js';
+    CombatPhase, BazaarOffering, CardInstance, generateId, HeroClass, CardRarity
+} from '../models/types';
 import { createInitialTerritories, generateDefenseMission, generateStoryMission,
          generateCaptureMission, getFrontlineTerritories, getCapturableTerritories,
-         calculateIncome, transferTerritory, getPlayerTerritories } from '../strategic/map.js';
-import { createStartingRoster, createHero, addStress } from '../data/heroes.js';
+         calculateIncome, transferTerritory, getPlayerTerritories } from '../strategic/map';
+import { createStartingRoster, createHero, addStress } from '../data/heroes';
 import { initializeCombat, startPlayerTurn, playCard, endPlayerTurn,
-         executeEnemyTurn, initiateRetreat, useBaselineAbility } from '../combat/combat.js';
-import { getEnemiesForEncounter } from '../data/enemies.js';
-import { getCardsByRarity, allCardsByClass } from '../data/cards.js';
-import { CardRarity } from '../models/types.js';
+         executeEnemyTurn, initiateRetreat, useBaselineAbility } from '../combat/combat';
+import { getEnemiesForEncounter } from '../data/enemies';
+import { getCardsByRarity, allCardsByClass } from '../data/cards';
 
 // ============================================
 // GAME STATE MANAGEMENT

@@ -1,5 +1,5 @@
-import { GameState, GamePhase, ResourceType } from './models/types.js';
-import { GameRenderer } from './ui/renderer.js';
+import { GameState, GamePhase, ResourceType } from './models/types';
+import { GameRenderer } from './ui/renderer';
 import {
     createNewGame,
     advanceDay,
@@ -10,7 +10,7 @@ import {
     openBazaar,
     closeBazaar,
     purchaseBazaarOffering
-} from './game/GameState.js';
+} from './game/GameState';
 
 // ============================================
 // MAIN APPLICATION

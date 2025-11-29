@@ -1,6 +1,6 @@
 import {
     Territory, Mission, MissionType, Faction, MissionRewards, generateId
-} from '../models/types.js';
+} from '../models/types';
 
 // ============================================
 // TERRITORY DEFINITIONS
