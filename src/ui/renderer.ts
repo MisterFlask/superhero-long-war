@@ -2,7 +2,7 @@ import {
     GameState, GamePhase, Hero, Mission, CombatState, CardInstance,
     Enemy, ResourceType, HeroClass, Faction, StatusEffectType,
     CombatPhase
-} from '../models/types.js';
+} from '../models/types';
 
 // ============================================
 // UI RENDERER
@@ -792,7 +792,7 @@ export class GameRenderer {
         const selectedHeroes: string[] = [];
         const slots = this.container.querySelectorAll('.hero-slot');
         const heroes = this.container.querySelectorAll('.selectable-hero');
-        const startBtn = this.container.getElementById('startMissionBtn') as HTMLButtonElement;
+        const startBtn = this.container.querySelector('#startMissionBtn') as HTMLButtonElement;
 
         heroes.forEach(hero => {
             hero.addEventListener('click', () => {

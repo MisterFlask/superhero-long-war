@@ -1,7 +1,7 @@
 import {
     Hero, HeroClass, CardInstance, Faction, generateId
-} from '../models/types.js';
-import { getStarterDeck } from './cards.js';
+} from '../models/types';
+import { getStarterDeck } from './cards';
 
 // ============================================
 // HERO NAMES BY CLASS

@@ -4,10 +4,17 @@
   "description": "Roguelike deckbuilder combining XCOM strategy with Slay the Spire combat",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
+    "build": "esbuild src/main.ts --bundle --outfile=dist/game.js --format=iife --sourcemap",
+    "build:prod": "esbuild src/main.ts --bundle --outfile=dist/game.js --format=iife --minify",
+    "watch": "esbuild src/main.ts --bundle --outfile=dist/game.js --format=iife --sourcemap --watch",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"",
+    "serve": "npx serve . -p 3000",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "esbuild": "^0.19.0",
+    "concurrently": "^8.2.0",
+    "serve": "^14.2.0"
   }
 }

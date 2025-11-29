@@ -1,7 +1,7 @@
 import {
     Enemy, EnemyAbility, EnemyIntentType, Faction,
     StatusEffectType, generateId
-} from '../models/types.js';
+} from '../models/types';
 
 // ============================================
 // ENEMY TEMPLATES

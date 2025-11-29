@@ -2,8 +2,8 @@ import {
     CombatState, CombatPhase, Hero, Enemy, CardInstance,
     Resources, ResourceType, StatusEffectType, StatusEffect,
     GadgetInstance, createEmptyResources, generateId, EnemyIntentType
-} from '../models/types.js';
-import { selectAbility, getSummonedEnemy } from '../data/enemies.js';
+} from '../models/types';
+import { selectAbility, getSummonedEnemy } from '../data/enemies';
 
 // ============================================
 // COMBAT INITIALIZATION
@@ -668,7 +668,8 @@ function applyBlockToTeam(state: CombatState, block: number): void {
 function calculateBlock(effect: any, resources: Resources): number {
     let block = effect.block || 0;
     if (effect.blockScaling) {
-        block += resources[effect.blockScaling.resource] * effect.blockScaling.multiplier;
+        const resource = effect.blockScaling.resource as ResourceType;
+        block += resources[resource] * effect.blockScaling.multiplier;
     }
     return block;
 }
